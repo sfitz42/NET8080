@@ -1,38 +1,37 @@
-﻿using Intel8080.Emulator;
+﻿using System;
+using Intel8080.Emulator;
 using Intel8080.Emulator.IO;
-using System;
 
-namespace Intel8080.TestRoms.IODevices
+namespace Intel8080.TestRoms.IODevices;
+
+internal class TestOutputPort : IOutputDevice
 {
-    internal class TestOutputPort : IOutputDevice
+    public const int PortNo = 0x01;
+
+    private readonly CPU _cpu;
+
+    public TestOutputPort(CPU cpu)
     {
-        public const int PortNo = 0x01;
+        _cpu = cpu;
+    }
 
-        private readonly CPU _cpu;
+    public void Write(byte data)
+    {
+        byte operation = _cpu.Registers.C;
 
-        public TestOutputPort(CPU cpu)
+        if (operation == 2)
         {
-            _cpu = cpu;
+            char c = (char)_cpu.Registers.E;
+
+            Console.Write(c);
         }
-
-        public void Write(byte data)
+        else if (operation == 9)
         {
-            byte operation = _cpu.Registers.C;
-
-            if (operation == 2)
+            ushort addr = (ushort)((_cpu.Registers.D << 8) | _cpu.Registers.E);
+            do
             {
-                char c = (char)_cpu.Registers.E;
-
-                Console.Write(c);
-            }
-            else if (operation == 9)
-            {
-                ushort addr = (ushort)((_cpu.Registers.D << 8) | _cpu.Registers.E);
-                do
-                {
-                    Console.Write((char)_cpu.Memory[addr++]);
-                } while (_cpu.Memory[addr] != '$');
-            }
+                Console.Write((char)_cpu.Memory[addr++]);
+            } while (_cpu.Memory[addr] != '$');
         }
     }
 }

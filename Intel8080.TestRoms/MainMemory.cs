@@ -1,25 +1,24 @@
-﻿using Intel8080.Emulator;
-using System.IO;
+﻿using System.IO;
+using Intel8080.Emulator;
 
-namespace Intel8080.TestRoms
+namespace Intel8080.TestRoms;
+
+internal class MainMemory : IMemory
 {
-    internal class MainMemory : IMemory
+    private readonly byte[] _memory;
+
+    public byte this[int index] { get => _memory[index]; set => _memory[index] = value; }
+
+    public MainMemory(int size)
     {
-        private readonly byte[] _memory;
+        _memory = new byte[size];
+    }
 
-        public byte this[int index] { get => _memory[index]; set => _memory[index] = value; }
-
-        public MainMemory(int size)
+    public void LoadRom(string path, int offset)
+    {
+        using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
         {
-            _memory = new byte[size];
-        }
-
-        public void LoadRom(string path, int offset)
-        {
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read))
-            {
-                fs.Read(_memory, offset, (int) fs.Length);
-            }
+            fs.Read(_memory, offset, (int)fs.Length);
         }
     }
 }
