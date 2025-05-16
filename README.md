@@ -3,7 +3,7 @@
 ## Building
 ### Requirements
 - Git
-- [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download)
+- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download)
 
 ```ps
 git clone https://github.com/sfitz42/NET8080.git
