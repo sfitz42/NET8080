@@ -1,103 +1,101 @@
 using System;
-using System.Linq;
 using Intel8080.Emulator.Instructions;
 using Intel8080.Emulator.IO;
 
-namespace Intel8080.Emulator
+namespace Intel8080.Emulator;
+
+public class CPU
 {
-    public class CPU
+    public IMemory Memory { get; }
+
+    public Registers Registers { get; }
+
+    public Flags Flags { get; }
+
+    public IIOController IOController { get; }
+
+    public long Cycles { get; set; } = 0;
+
+    public bool Halted { get; set; }
+
+    public bool InterruptEnabled { get; set; } = false;
+
+    private readonly Action<CPU>[] _instructionSet = DefaultInstructionSet.Actions;
+
+    private byte? _interrupt = null;
+
+    public CPU(IMemory memory)
     {
-        public IMemory Memory { get; }
+        Memory = memory;
+        Registers = new Registers();
+        Flags = new Flags();
+        IOController = new DefaultIOController();
+    }
 
-        public Registers Registers { get; }
-
-        public Flags Flags { get; }
-
-        public IIOController IOController { get; }
-
-        public long Cycles { get; set; } = 0;
-
-        public bool Halted { get; set; }
-
-        public bool InterruptEnabled { get; set; } = false;
-
-        private readonly Action<CPU>[] _instructionSet = DefaultInstructionSet.Actions;
-
-        private byte? _interrupt = null;
-
-        public CPU(IMemory memory)
+    public void Run()
+    {
+        while (!Halted)
         {
-            Memory = memory;
-            Registers = new Registers();
-            Flags = new Flags();
-            IOController = new DefaultIOController();
+            Step();
+        }
+    }
+
+    public void Step()
+    {
+        byte opcode;
+
+        if (InterruptEnabled && _interrupt != null)
+        {
+            opcode = _interrupt.Value;
+
+            InterruptEnabled = false;
+            _interrupt = null;
+        }
+        else
+        {
+            opcode = ReadNextByte();
         }
 
-        public void Run()
-        {
-            while (!Halted)
-            {
-                Step();
-            }
-        }
+        _instructionSet[opcode](this);
 
-        public void Step()
-        {
-            byte opcode;
+        Cycles += OpcodeTable.Opcodes[opcode].Cycles;
+    }
 
-            if (InterruptEnabled && _interrupt != null)
-            {
-                opcode = _interrupt.Value;
+    public void Reset()
+    {
+        Registers.Clear();
+        Flags.Clear();
+    }
 
-                InterruptEnabled = false;
-                _interrupt = null;
-            }
-            else
-            {
-                opcode = ReadNextByte();
-            }
+    public void RaiseInterrupt(byte opcode)
+    {
+        _interrupt = opcode;
+    }
 
-            _instructionSet[opcode](this);
+    internal byte ReadByte(int address)
+    {
+        return Memory[address];
+    }
 
-            Cycles += OpcodeTable.Opcodes[opcode].Cycles;
-        }
+    internal ushort ReadUshort(int address)
+    {
+        var a = ReadByte(address + 1);
+        var b = ReadByte(address);
 
-        public void Reset()
-        {
-            Registers.Clear();
-            Flags.Clear();
-        }
+        return (ushort)((a << 8) | b);
+    }
 
-        public void RaiseInterrupt(byte opcode)
-        {
-            _interrupt = opcode;
-        }
+    internal byte ReadNextByte()
+    {
+        return ReadByte(Registers.PC++);
+    }
 
-        internal byte ReadByte(int address)
-        {
-            return Memory[address];
-        }
+    internal ushort ReadNextUshort()
+    {
+        var res = ReadUshort(Registers.PC);
 
-        internal ushort ReadUshort(int address)
-        {
-            var a = ReadByte(address + 1);
-            var b = ReadByte(address);
+        Registers.PC += 2;
 
-            return (ushort)((a << 8) | b);
-        }
-
-        internal byte ReadNextByte()
-        {
-            return ReadByte(Registers.PC++);
-        }
-
-        internal ushort ReadNextUshort()
-        {
-            var res = ReadUshort(Registers.PC);
-
-            Registers.PC += 2;
-
-            return res;
-        }
+        return res;
     }
 }

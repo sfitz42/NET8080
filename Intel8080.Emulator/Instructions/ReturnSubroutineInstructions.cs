@@ -1,90 +1,89 @@
-namespace Intel8080.Emulator.Instructions
+namespace Intel8080.Emulator.Instructions;
+
+public static partial class DefaultInstructionSet
 {
-    public static partial class DefaultInstructionSet
+    public static void RET(CPU cpu)
     {
-        public static void RET(CPU cpu)
+        cpu.Registers.PC = PopStack(cpu);
+    }
+
+    public static void RZ(CPU cpu)
+    {
+        if (cpu.Flags.Zero)
         {
-            cpu.Registers.PC = PopStack(cpu);
+            RET(cpu);
+
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RZ(CPU cpu)
+    public static void RNZ(CPU cpu)
+    {
+        if (!cpu.Flags.Zero)
         {
-            if (cpu.Flags.Zero)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RNZ(CPU cpu)
+    public static void RNC(CPU cpu)
+    {
+        if (!cpu.Flags.Carry)
         {
-            if (!cpu.Flags.Zero)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RNC(CPU cpu)
+    public static void RC(CPU cpu)
+    {
+        if (cpu.Flags.Carry)
         {
-            if (!cpu.Flags.Carry)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RC(CPU cpu)
+    public static void RPO(CPU cpu)
+    {
+        if (!cpu.Flags.Parity)
         {
-            if (cpu.Flags.Carry)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RPO(CPU cpu)
+    public static void RPE(CPU cpu)
+    {
+        if (cpu.Flags.Parity)
         {
-            if (!cpu.Flags.Parity)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RPE(CPU cpu)
+    public static void RP(CPU cpu)
+    {
+        if (!cpu.Flags.Sign)
         {
-            if (cpu.Flags.Parity)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
+    }
 
-        public static void RP(CPU cpu)
+    public static void RM(CPU cpu)
+    {
+        if (cpu.Flags.Sign)
         {
-            if (!cpu.Flags.Sign)
-            {
-                RET(cpu);
+            RET(cpu);
 
-                cpu.Cycles += 6;
-            }
-        }
-
-        public static void RM(CPU cpu)
-        {
-            if (cpu.Flags.Sign)
-            {
-                RET(cpu);
-
-                cpu.Cycles += 6;
-            }
+            cpu.Cycles += 6;
         }
     }
 }
