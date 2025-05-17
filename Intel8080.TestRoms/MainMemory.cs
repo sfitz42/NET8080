@@ -3,7 +3,7 @@ using Intel8080.Emulator;
 
 namespace Intel8080.TestRoms;
 
-internal class MainMemory : IMemory
+public class MainMemory : IMemory
 {
     private readonly byte[] _memory;
 

@@ -20,10 +20,10 @@ public class TestSuite
         "Roms/8080EXM.COM"
     };
 
-    public TestSuite()
+    public TestSuite(CPU cpu, MainMemory memory)
     {
-        _memory = new MainMemory(0x10000);
-        _cpu = new CPU(_memory);
+        _cpu = cpu;
+        _memory = memory;
 
         _testCompletePort = new TestCompletePort();
         _textOutputPort = new TestOutputPort(_cpu);
